@@ -4,12 +4,11 @@ pypdf==5.0.1
 
 langchain==0.3.9
 langchain-community==0.3.9
-langchain-google-genai==2.0.4
 langchain-text-splitters==0.3.2
 
 langchain-huggingface
 sentence-transformers
-
 faiss-cpu==1.12.0
 
-google-generativeai
+langchain-groq
+groq
