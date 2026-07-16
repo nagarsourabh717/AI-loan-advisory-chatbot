@@ -19,8 +19,8 @@ def ask_question(question):
         return "❌ Please process a PDF first.", []
 
     embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    model_name="sentence-transformers/paraphrase-MiniLM-L3-v2"
+)
 
     vector_db = FAISS.load_local(
         "vectorstore",
