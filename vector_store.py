@@ -4,22 +4,28 @@ from langchain_community.vectorstores import FAISS
 
 def create_vector_store(chunks):
 
-    print("Loading Gemini Embeddings...")
+    try:
 
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/embedding-001"
-    )
+        print("Loading Gemini Embeddings...")
 
-    print("Creating FAISS Database...")
+        embeddings = GoogleGenerativeAIEmbeddings(
+            model="models/embedding-001"
+        )
 
-    vector_db = FAISS.from_texts(
-        texts=chunks,
-        embedding=embeddings
-    )
+        print("Creating FAISS Database...")
 
-    vector_db.save_local("vectorstore")
+        vector_db = FAISS.from_texts(
+            texts=chunks,
+            embedding=embeddings
+        )
 
-    print("Vector Store Created Successfully")
+        vector_db.save_local("vectorstore")
+
+        print("✅ Vector Store Created Successfully")
+
+    except Exception as e:
+        print("Vector Store Error:", e)
+        raise e
 
 
 def load_vector_store():

@@ -9,32 +9,34 @@ load_dotenv()
 
 def ask_question(question):
 
-    api_key = os.getenv("GOOGLE_API_KEY")
+    try:
 
-    if not api_key:
-        return "❌ GOOGLE_API_KEY not found.", []
+        api_key = os.getenv("GOOGLE_API_KEY")
 
-    if not os.path.exists("vectorstore"):
-        return "❌ Please process a PDF first.", []
+        if not api_key:
+            return "❌ GOOGLE_API_KEY not found.", []
 
-    vector_db = load_vector_store()
+        if not os.path.exists("vectorstore"):
+            return "❌ Please process a PDF first.", []
 
-    docs = vector_db.similarity_search(question, k=3)
+        vector_db = load_vector_store()
 
-    context = "\n\n".join(doc.page_content for doc in docs)
+        docs = vector_db.similarity_search(question, k=3)
 
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        google_api_key=api_key,
-        temperature=0.2
-    )
+        context = "\n\n".join(doc.page_content for doc in docs)
 
-    prompt = f"""
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.0-flash",
+            google_api_key=api_key,
+            temperature=0.2
+        )
+
+        prompt = f"""
 You are an AI Loan Advisory Assistant.
 
-Answer ONLY from the loan policy provided below.
+Answer ONLY from the loan policy below.
 
-If the answer is not found in the context, reply exactly:
+If the answer is not found, reply:
 
 "I couldn't find this information in the provided loan policy."
 
@@ -45,8 +47,12 @@ Question:
 {question}
 """
 
-    response = llm.invoke(prompt)
+        response = llm.invoke(prompt)
 
-    sources = [doc.page_content for doc in docs]
+        sources = [doc.page_content for doc in docs]
 
-    return response.content, sources
+        return response.content, sources
+
+    except Exception as e:
+        print("Chatbot Error:", e)
+        return f"❌ {str(e)}", []
