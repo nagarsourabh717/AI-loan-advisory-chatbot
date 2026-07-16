@@ -1,34 +1,31 @@
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
-MODEL_NAME = "sentence-transformers/paraphrase-MiniLM-L3-v2"
 
 def create_vector_store(chunks):
-    print("Step 1: Loading embedding model...")
 
-    embeddings = HuggingFaceEmbeddings(
-        model_name=MODEL_NAME
+    print("Loading Gemini Embeddings...")
+
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/embedding-001"
     )
 
-    print("Step 2: Embedding model loaded")
-
-    print("Step 3: Creating FAISS database...")
+    print("Creating FAISS Database...")
 
     vector_db = FAISS.from_texts(
         texts=chunks,
         embedding=embeddings
     )
 
-    print("Step 4: Saving vector store...")
-
     vector_db.save_local("vectorstore")
 
-    print("✅ Vector Store Created Successfully")
+    print("Vector Store Created Successfully")
 
 
 def load_vector_store():
-    embeddings = HuggingFaceEmbeddings(
-        model_name=MODEL_NAME
+
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/embedding-001"
     )
 
     return FAISS.load_local(

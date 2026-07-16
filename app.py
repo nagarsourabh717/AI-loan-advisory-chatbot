@@ -6,7 +6,6 @@ from pdf_loader import read_pdf
 from text_splitter import split_text
 from vector_store import create_vector_store
 
-
 st.set_page_config(
     page_title="AI Loan Advisory Chatbot",
     page_icon="🏦",
@@ -31,45 +30,45 @@ with st.sidebar:
 
     st.title("🏦 AI Loan Advisor")
 
-    # ✅ Multiple PDF Upload
     uploaded_files = st.file_uploader(
         "Upload PDFs",
         type="pdf",
         accept_multiple_files=True
     )
 
-    # ✅ Process Button
     if st.button("Process PDF"):
 
         if uploaded_files:
 
-            with st.spinner("Processing PDFs..."):
+            try:
 
-                all_text = ""
+                with st.spinner("Processing PDFs..."):
 
-                # ✅ Read all PDFs
-                for file in uploaded_files:
-                    text = read_pdf(file)
-                    all_text += text
+                    all_text = ""
 
-                # ✅ Check empty text
-                if len(all_text.strip()) == 0:
-                    st.error("No text found inside PDFs.")
-                else:
-                    # ✅ Create chunks
-                    chunks = split_text(all_text)
+                    for file in uploaded_files:
+                        text = read_pdf(file)
+                        all_text += text
 
-                    # ✅ Create vector DB
-                    create_vector_store(chunks)
+                    if not all_text.strip():
+                        st.error("❌ No text found inside PDF.")
+                    else:
 
-                    # ✅ Update session
-                    st.session_state.current_pdf = f"{len(uploaded_files)} PDFs Uploaded"
-                    st.session_state.messages = []
+                        chunks = split_text(all_text)
 
-                    st.success("All PDFs Processed Successfully ✅")
+                        create_vector_store(chunks)
+
+                        st.session_state.current_pdf = f"{len(uploaded_files)} PDF(s) Uploaded"
+                        st.session_state.messages = []
+
+                        st.success("✅ PDF Processed Successfully")
+
+            except Exception as e:
+                st.error(f"❌ {e}")
+                print("ERROR:", e)
 
         else:
-            st.warning("Please upload at least one PDF")
+            st.warning("Please upload at least one PDF.")
 
     st.divider()
 
@@ -79,9 +78,9 @@ with st.sidebar:
     st.divider()
 
     if os.path.exists("vectorstore"):
-        st.success("Vector Database Ready ✅")
+        st.success("✅ Vector Database Ready")
     else:
-        st.warning("Vector Database Not Found")
+        st.warning("⚠️ Vector Database Not Found")
 
     st.divider()
 
@@ -108,14 +107,13 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # ===========================
-# User Input
+# User Question
 # ===========================
 
 question = st.chat_input("Ask your question...")
 
 if question:
 
-    # Add user message
     st.session_state.messages.append({
         "role": "user",
         "content": question
@@ -124,11 +122,12 @@ if question:
     with st.chat_message("user"):
         st.markdown(question)
 
-    # Assistant response
     with st.chat_message("assistant"):
+
         with st.spinner("Searching..."):
 
             try:
+
                 answer, sources = ask_question(question)
 
                 st.markdown(answer)
@@ -140,10 +139,10 @@ if question:
                             st.write(source)
 
             except Exception as e:
-                answer = f"❌ Error: {str(e)}"
+
+                answer = f"❌ {e}"
                 st.error(answer)
 
-    # Save assistant message
     st.session_state.messages.append({
         "role": "assistant",
         "content": answer
